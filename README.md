@@ -9,7 +9,7 @@ Let [Blog in a Box](https://inabox.blog) take pictures based on sensors or actio
  * 1uF capacitor
  * Various resistors
 
- ## Wiring
-[Fritzing](./paparazzi.fzz)
+## Wiring
+Check out the [Fritzing](./paparazzi.fzz) or reference the screenshot below.
 
 ![Blog in a Box Paparazzi Fritzing](./paparazzi-fritzing.png?raw=true "Blog in a Box Paparazzi Fritzing")
