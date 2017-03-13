@@ -15,4 +15,4 @@ Check out the [Fritzing](./paparazzi.fzz) or reference the screenshot below.
 ![Blog in a Box Paparazzi Fritzing](./paparazzi-fritzing.png?raw=true "Blog in a Box Paparazzi Fritzing")
 
 ## Instructions
-Update any of the necessary PIN constants at the top of `paparazzi.py` and their either run manually `python paparazzy.pi` or [run as a service](http://www.diegoacuna.me/how-to-run-a-script-as-a-service-in-raspberry-pi-raspbian-jessie/).
+Update any of the necessary PIN constants at the top of `paparazzi.py` and then either run manually `python paparazzy.pi` or [run as a service](http://www.diegoacuna.me/how-to-run-a-script-as-a-service-in-raspberry-pi-raspbian-jessie/).
