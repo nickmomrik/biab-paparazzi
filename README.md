@@ -16,3 +16,6 @@ Check out the [Fritzing](./paparazzi.fzz) or reference the screenshot below.
 
 ## Instructions
 Update any of the necessary PIN constants at the top of `paparazzi.py` and then either run manually `python paparazzy.pi` or [run as a service](http://www.diegoacuna.me/how-to-run-a-script-as-a-service-in-raspberry-pi-raspbian-jessie/).
+
+## Note
+The Ultrasonic Sensor trigger needs some work because it triggers way too often. Might try some averaging over time.
