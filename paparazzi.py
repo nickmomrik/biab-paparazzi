@@ -14,6 +14,12 @@ ULTRASONIC_TRIG_PIN = 20
 ULTRASONIC_ECHO_PIN = 21
 ULTRASONIC_LED_PIN  = 13
 
+# Test constants
+PHOTOCELL_LIGHT  = 3000
+PHOTOCELL_DIFF   = 500
+ULTRASONIC_NEAR  = 100
+ULTRASONIC_FAR   = 130
+
 GPIO.setmode( GPIO.BCM )
 
 GPIO.setup( BUTTON_PIN, GPIO.IN )
@@ -30,11 +36,9 @@ GPIO.output( ULTRASONIC_LED_PIN, GPIO.LOW )
 
 def take_picture( led_pin, title ) :
 	GPIO.output( led_pin, GPIO.HIGH )
-
-	time = datetime.now().strftime( '%-I:%M:%S %p' )
-	os.system( '/opt/bloginabox/biab camera-take-photo "' + time + ' - ' + title + '"' )
-
+	os.system( '/opt/bloginabox/biab camera-take-photo "' + datetime.now().strftime( '%-I:%M:%S %p' ) + ' - ' + title + '"' )
 	GPIO.output( led_pin, GPIO.LOW )
+	reset_prev_readings()
 
 # https://learn.adafruit.com/basic-resistor-sensor-reading-on-raspberry-pi/basic-photocell-reading
 def read_photocell() :
@@ -54,7 +58,7 @@ def read_photocell() :
 def read_ultrasonic() :
 	# Trigger the sensor
 	GPIO.output( ULTRASONIC_TRIG_PIN, GPIO.HIGH )
-	time.sleep(0.00001)
+	time.sleep( 0.00001 )
 	GPIO.output( ULTRASONIC_TRIG_PIN, GPIO.LOW )
 
 	# Read the sensor
@@ -67,25 +71,61 @@ def read_ultrasonic() :
 		if ( GPIO.input( ULTRASONIC_ECHO_PIN ) == GPIO.LOW ) :
 			break
 
+	time.sleep( 0.0001 )
+
 	return round( ( pulse_end - pulse_start ) * 17150, 2 )
 
-prev_button = True
-prev_photocell = read_photocell()
-prev_ultrasonic = read_ultrasonic()
-time.sleep( 2 )
+def is_button_triggered() :
+	global prev_button
+	button = GPIO.input( BUTTON_PIN )
+	trigger = False == button and True == prev_button
+	prev_button = button
+
+	return trigger
+
+def is_photocell_triggered() :
+	global prev_photocell
+	photocell = ( read_photocell(), read_photocell(), read_photocell() )
+	trigger = False
+	if ( photocell[0] != -1 ) :
+		if ( photocell[0] < PHOTOCELL_LIGHT and photocell[1] < PHOTOCELL_LIGHT and photocell[2] < PHOTOCELL_LIGHT ) :
+			if ( photocell[2] < ( prev_photocell[0] - PHOTOCELL_DIFF ) ) :
+				#print 'Previous Photocell: {0}'.format( prev_photocell )
+				#print 'Current Photocell: {0}'.format( photocell )
+				trigger = True
+
+	prev_photocell = photocell
+
+	return trigger
+
+def is_ultrasonic_triggered() :
+	global prev_ultrasonic
+	ultrasonic = ( read_ultrasonic(), read_ultrasonic(), read_ultrasonic() )
+	trigger = False
+	if ( ultrasonic[0] != -1 ) :
+		if ( ultrasonic[0] < ULTRASONIC_NEAR and ultrasonic[1] < ULTRASONIC_NEAR and ultrasonic[2] < ULTRASONIC_NEAR ) :
+			if ( prev_ultrasonic[0] > ULTRASONIC_FAR and prev_ultrasonic[1] > ULTRASONIC_FAR and prev_ultrasonic[2] > ULTRASONIC_FAR ) :
+				#print 'Previous Ultrasonic: {0}'.format( prev_ultrasonic )
+				#print 'Current Ultrasonic: {0}'.format( ultrasonic )
+				trigger = True
+
+	prev_ultrasonic = ultrasonic
+
+	return trigger
+
+def reset_prev_readings() :
+	global prev_photocell, prev_ultrasonic, prev_button
+	prev_button = True
+	prev_photocell = ( -1, -1, -1 )
+	prev_ultrasonic = ( -1, -1, -1 )
+	time.sleep( 2 )
+
+reset_prev_readings()
 
 while True:
-	button = GPIO.input( BUTTON_PIN )
-	photocell = read_photocell()
-	ultrasonic = read_ultrasonic()
-
-	if ( False == button == False and True == prev_button ) :
+	if ( is_button_triggered() ) :
 		take_picture( BUTTON_LED_PIN, 'Button' )
-	elif ( photocell != -1 and photocell < 3000 and photocell < ( prev_photocell - 500 ) ) :
+	elif ( is_photocell_triggered() ) :
 		take_picture( PHOTOCELL_LED_PIN, 'Photocell' )
-	elif ( ultrasonic != -1 and ultrasonic < 100 and prev_ultrasonic > 150 ) :
+	elif ( is_ultrasonic_triggered() ) :
 		take_picture( ULTRASONIC_LED_PIN, 'Ultrasonic' )
-
-	prev_button = button
-	prev_photocell = photocell
-	prev_ultrasonic = ultrasonic

@@ -15,7 +15,4 @@ Check out the [Fritzing](./paparazzi.fzz) or reference the screenshot below.
 ![Blog in a Box Paparazzi Fritzing](./paparazzi-fritzing.png?raw=true "Blog in a Box Paparazzi Fritzing")
 
 ## Instructions
-Update any of the necessary PIN constants at the top of `paparazzi.py` and then either run manually `python paparazzy.pi` or [run as a service](http://www.diegoacuna.me/how-to-run-a-script-as-a-service-in-raspberry-pi-raspbian-jessie/).
-
-## Note
-The Ultrasonic Sensor trigger needs some work because it triggers way too often. Might try some averaging over time.
+Update any of the necessary GPIO PIN values at the top of `paparazzi.py` and then either run manually `python paparazzy.pi` or [run as a service](http://www.diegoacuna.me/how-to-run-a-script-as-a-service-in-raspberry-pi-raspbian-jessie/). Depending on your envionment, you may need to update the TEST CONSTANT values so that triggers don't happen too often.
