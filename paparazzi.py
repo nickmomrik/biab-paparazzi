@@ -2,6 +2,7 @@
 
 import RPi.GPIO as GPIO
 import time
+from datetime import datetime
 import os
 
 # GPIO Pins
@@ -27,10 +28,11 @@ GPIO.output( PHOTOCELL_LED_PIN, GPIO.LOW )
 GPIO.output( ULTRASONIC_TRIG_PIN, GPIO.LOW )
 GPIO.output( ULTRASONIC_LED_PIN, GPIO.LOW )
 
-def take_picture( led_pin ) :
+def take_picture( led_pin, title ) :
 	GPIO.output( led_pin, GPIO.HIGH )
 
-	os.system( '/opt/bloginabox/biab camera-take-photo' )
+	time = datetime.now().strftime( '%-I:%M:%S %p' )
+	os.system( '/opt/bloginabox/biab camera-take-photo "' + time + ' - ' + title + '"' )
 
 	GPIO.output( led_pin, GPIO.LOW )
 
@@ -78,11 +80,11 @@ while True:
 	ultrasonic = read_ultrasonic()
 
 	if ( False == button == False and True == prev_button ) :
-		take_picture( BUTTON_LED_PIN )
+		take_picture( BUTTON_LED_PIN, 'Button' )
 	elif ( photocell != -1 and photocell < 3000 and photocell < ( prev_photocell - 500 ) ) :
-		take_picture( PHOTOCELL_LED_PIN )
+		take_picture( PHOTOCELL_LED_PIN, 'Photocell' )
 	elif ( ultrasonic != -1 and ultrasonic < 100 and prev_ultrasonic > 150 ) :
-		take_picture( ULTRASONIC_LED_PIN )
+		take_picture( ULTRASONIC_LED_PIN, 'Ultrasonic' )
 
 	prev_button = button
 	prev_photocell = photocell
