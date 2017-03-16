@@ -5,7 +5,7 @@ import time
 from datetime import datetime
 import os
 
-# GPIO Pins
+# GPIO PINS
 BUTTON_PIN          = 23
 BUTTON_LED_PIN      = 5
 PHOTOCELL_PIN       = 18
@@ -14,7 +14,7 @@ ULTRASONIC_TRIG_PIN = 20
 ULTRASONIC_ECHO_PIN = 21
 ULTRASONIC_LED_PIN  = 13
 
-# Test constants
+# TEST CONSTANTS
 PHOTOCELL_LIGHT  = 3000
 PHOTOCELL_DIFF   = 500
 ULTRASONIC_NEAR  = 100
@@ -85,39 +85,47 @@ def is_button_triggered() :
 
 def is_photocell_triggered() :
 	global prev_photocell
-	photocell = ( read_photocell(), read_photocell(), read_photocell() )
-	trigger = False
-	if ( photocell[0] != -1 ) :
-		if ( photocell[0] < PHOTOCELL_LIGHT and photocell[1] < PHOTOCELL_LIGHT and photocell[2] < PHOTOCELL_LIGHT ) :
-			if ( photocell[2] < ( prev_photocell[0] - PHOTOCELL_DIFF ) ) :
-				#print 'Previous Photocell: {0}'.format( prev_photocell )
-				#print 'Current Photocell: {0}'.format( photocell )
-				trigger = True
 
-	prev_photocell = photocell
+	# Take 6 readings
+	for i in range( 1, 6 ):
+		photocell = read_photocell()
+		# Shift readings
+		prev_photocell = ( prev_photocell[1], prev_photocell[2], prev_photocell[3], prev_photocell[4], prev_photocell[5], photocell )
 
-	return trigger
+		if ( prev_photocell[0] != -1 ) :
+			new_avg = ( prev_photocell[3] + prev_photocell[4] + prev_photocell[5] ) / 3
+			if ( new_avg < PHOTOCELL_LIGHT ) :
+				old_avg = ( prev_photocell[0] + prev_photocell[1] + prev_photocell[2] ) / 3
+				if ( new_avg < ( old_avg - PHOTOCELL_DIFF ) ) :
+					#print 'Photocell: {0}'.format( prev_photocell )
+					return True
+
+	return False
 
 def is_ultrasonic_triggered() :
 	global prev_ultrasonic
-	ultrasonic = ( read_ultrasonic(), read_ultrasonic(), read_ultrasonic() )
-	trigger = False
-	if ( ultrasonic[0] != -1 ) :
-		if ( ultrasonic[0] < ULTRASONIC_NEAR and ultrasonic[1] < ULTRASONIC_NEAR and ultrasonic[2] < ULTRASONIC_NEAR ) :
-			if ( prev_ultrasonic[0] > ULTRASONIC_FAR and prev_ultrasonic[1] > ULTRASONIC_FAR and prev_ultrasonic[2] > ULTRASONIC_FAR ) :
-				#print 'Previous Ultrasonic: {0}'.format( prev_ultrasonic )
-				#print 'Current Ultrasonic: {0}'.format( ultrasonic )
-				trigger = True
 
-	prev_ultrasonic = ultrasonic
+	# Take 6 readings
+	for i in range( 1, 6 ):
+		ultrasonic = read_ultrasonic()
+		#Shift readings
+		prev_ultrasonic = ( prev_ultrasonic[1], prev_ultrasonic[2], prev_ultrasonic[3], prev_ultrasonic[4], prev_ultrasonic[5], ultrasonic )
 
-	return trigger
+		if ( prev_ultrasonic[0] != -1 ) :
+			new_avg = ( prev_ultrasonic[3] + prev_ultrasonic[4] + prev_ultrasonic[5] ) / 3
+			if ( new_avg < ULTRASONIC_NEAR ) :
+				old_avg = ( prev_ultrasonic[0] + prev_ultrasonic[1] + prev_ultrasonic[2] ) / 3
+				if ( old_avg > ULTRASONIC_FAR ) :
+					#print 'Ultrasonic: {0}'.format( prev_ultrasonic )
+					return True
+
+	return False
 
 def reset_prev_readings() :
 	global prev_photocell, prev_ultrasonic, prev_button
 	prev_button = True
-	prev_photocell = ( -1, -1, -1 )
-	prev_ultrasonic = ( -1, -1, -1 )
+	prev_photocell = ( -1, -1, -1, -1, -1, -1 )
+	prev_ultrasonic = ( -1, -1, -1, -1, -1, -1 )
 	time.sleep( 2 )
 
 reset_prev_readings()
