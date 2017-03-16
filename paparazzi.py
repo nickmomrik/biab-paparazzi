@@ -15,7 +15,7 @@ ULTRASONIC_ECHO_PIN = 21
 ULTRASONIC_LED_PIN  = 13
 
 # TEST CONSTANTS
-PHOTOCELL_LIGHT  = 3000
+PHOTOCELL_LIGHT  = 1500
 PHOTOCELL_DIFF   = 500
 ULTRASONIC_NEAR  = 100
 ULTRASONIC_FAR   = 130
@@ -93,11 +93,12 @@ def is_photocell_triggered() :
 		prev_photocell = ( prev_photocell[1], prev_photocell[2], prev_photocell[3], prev_photocell[4], prev_photocell[5], photocell )
 
 		if ( prev_photocell[0] != -1 ) :
-			new_avg = ( prev_photocell[3] + prev_photocell[4] + prev_photocell[5] ) / 3
-			if ( new_avg < PHOTOCELL_LIGHT ) :
+
+			if ( prev_photocell[3] < PHOTOCELL_LIGHT and  prev_photocell[4] < PHOTOCELL_LIGHT and prev_photocell[5] < PHOTOCELL_LIGHT ) :
+				new_avg = ( prev_photocell[3] + prev_photocell[4] + prev_photocell[5] ) / 3
 				old_avg = ( prev_photocell[0] + prev_photocell[1] + prev_photocell[2] ) / 3
 				if ( new_avg < ( old_avg - PHOTOCELL_DIFF ) ) :
-					#print 'Photocell: {0}'.format( prev_photocell )
+					print 'Photocell: {0}'.format( prev_photocell )
 					return True
 
 	return False
@@ -112,11 +113,9 @@ def is_ultrasonic_triggered() :
 		prev_ultrasonic = ( prev_ultrasonic[1], prev_ultrasonic[2], prev_ultrasonic[3], prev_ultrasonic[4], prev_ultrasonic[5], ultrasonic )
 
 		if ( prev_ultrasonic[0] != -1 ) :
-			new_avg = ( prev_ultrasonic[3] + prev_ultrasonic[4] + prev_ultrasonic[5] ) / 3
-			if ( new_avg < ULTRASONIC_NEAR ) :
-				old_avg = ( prev_ultrasonic[0] + prev_ultrasonic[1] + prev_ultrasonic[2] ) / 3
-				if ( old_avg > ULTRASONIC_FAR ) :
-					#print 'Ultrasonic: {0}'.format( prev_ultrasonic )
+			if ( prev_ultrasonic[3] < ULTRASONIC_NEAR and prev_ultrasonic[4] < ULTRASONIC_NEAR and prev_ultrasonic[5] < ULTRASONIC_NEAR ) :
+				if ( prev_ultrasonic[0] > ULTRASONIC_FAR and prev_ultrasonic[1] > ULTRASONIC_FAR and prev_ultrasonic[2] > ULTRASONIC_FAR ) :
+					print 'Ultrasonic: {0}'.format( prev_ultrasonic )
 					return True
 
 	return False
@@ -126,7 +125,7 @@ def reset_prev_readings() :
 	prev_button = True
 	prev_photocell = ( -1, -1, -1, -1, -1, -1 )
 	prev_ultrasonic = ( -1, -1, -1, -1, -1, -1 )
-	time.sleep( 2 )
+	time.sleep( 1 )
 
 reset_prev_readings()
 
