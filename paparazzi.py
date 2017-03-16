@@ -15,8 +15,8 @@ ULTRASONIC_ECHO_PIN = 21
 ULTRASONIC_LED_PIN  = 13
 
 # TEST CONSTANTS
-PHOTOCELL_LIGHT  = 1500
-PHOTOCELL_DIFF   = 750
+PHOTOCELL_LIGHT  = 50
+PHOTOCELL_DIFF   = 100
 ULTRASONIC_NEAR  = 100
 ULTRASONIC_FAR   = 120
 
@@ -42,17 +42,18 @@ def take_picture( led_pin, title ) :
 
 # https://learn.adafruit.com/basic-resistor-sensor-reading-on-raspberry-pi/basic-photocell-reading
 def read_photocell() :
-    reading = 0
-    GPIO.setup( PHOTOCELL_PIN, GPIO.OUT )
-    GPIO.output( PHOTOCELL_PIN, GPIO.LOW )
-    time.sleep( 0.1 )
+	GPIO.setup( PHOTOCELL_PIN, GPIO.OUT )
+	GPIO.output( PHOTOCELL_PIN, GPIO.LOW )
+	time.sleep( 0.05 )
 
-    GPIO.setup( PHOTOCELL_PIN, GPIO.IN )
-    # This takes about 1 millisecond per loop cycle
-    while ( GPIO.input( PHOTOCELL_PIN ) == GPIO.LOW ):
-        reading += 1
+	start = time.time()
+	GPIO.setup( PHOTOCELL_PIN, GPIO.IN )
 
-    return reading
+	end = start
+	while ( GPIO.input( PHOTOCELL_PIN ) == GPIO.LOW ) :
+		end = time.time()
+
+	return int( round( ( end - start ) * 1000 ) )
 
 # https://www.modmypi.com/blog/hc-sr04-ultrasonic-range-sensor-on-the-raspberry-pi
 def read_ultrasonic() :
@@ -73,7 +74,7 @@ def read_ultrasonic() :
 
 	time.sleep( 0.0001 )
 
-	return round( ( pulse_end - pulse_start ) * 17150, 2 )
+	return int( round( ( pulse_end - pulse_start ) * 17150 ) )
 
 def is_button_triggered() :
 	global prev_button
