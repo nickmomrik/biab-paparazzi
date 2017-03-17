@@ -17,8 +17,7 @@ ULTRASONIC_LED_PIN  = 13
 # TEST CONSTANTS
 PHOTOCELL_LIGHT  = 50
 PHOTOCELL_DIFF   = 100
-ULTRASONIC_NEAR  = 100
-ULTRASONIC_FAR   = 120
+ULTRASONIC_DIST  = 110
 
 GPIO.setmode( GPIO.BCM )
 
@@ -113,8 +112,8 @@ def is_ultrasonic_triggered() :
 		prev_ultrasonic = ( prev_ultrasonic[1], prev_ultrasonic[2], prev_ultrasonic[3], prev_ultrasonic[4], prev_ultrasonic[5], ultrasonic )
 
 		if ( prev_ultrasonic[0] != -1 ) :
-			if ( prev_ultrasonic[3] < ULTRASONIC_NEAR and prev_ultrasonic[4] < ULTRASONIC_NEAR and prev_ultrasonic[5] < ULTRASONIC_NEAR ) :
-				if ( prev_ultrasonic[0] > ULTRASONIC_FAR and prev_ultrasonic[1] > ULTRASONIC_FAR and prev_ultrasonic[2] > ULTRASONIC_FAR ) :
+			if ( prev_ultrasonic[3] < ULTRASONIC_DIST and prev_ultrasonic[4] < ULTRASONIC_DIST and prev_ultrasonic[5] < ULTRASONIC_DIST ) :
+				if ( prev_ultrasonic[0] > ULTRASONIC_DIST and prev_ultrasonic[1] > ULTRASONIC_DIST and prev_ultrasonic[2] > ULTRASONIC_DIST ) :
 					#print 'Ultrasonic: {0}'.format( prev_ultrasonic )
 					return True
 
