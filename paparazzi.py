@@ -44,7 +44,7 @@ def take_picture( led_pin, title ) :
 def read_photocell() :
 	GPIO.setup( PHOTOCELL_PIN, GPIO.OUT )
 	GPIO.output( PHOTOCELL_PIN, GPIO.LOW )
-	time.sleep( 0.05 )
+	time.sleep( 0.1 )
 
 	start = time.time()
 	GPIO.setup( PHOTOCELL_PIN, GPIO.IN )
@@ -87,16 +87,16 @@ def is_button_triggered() :
 def is_photocell_triggered() :
 	global prev_photocell
 
-	# Take 6 readings
-	for i in range( 1, 6 ):
+	# Take 4 readings
+	for i in range( 1, 4 ):
 		photocell = read_photocell()
 		# Shift readings
-		prev_photocell = ( prev_photocell[1], prev_photocell[2], prev_photocell[3], prev_photocell[4], prev_photocell[5], photocell )
+		prev_photocell = ( prev_photocell[1], prev_photocell[2], prev_photocell[3], photocell )
 
 		if ( prev_photocell[0] != -1 ) :
-			if ( prev_photocell[3] < PHOTOCELL_LIGHT and  prev_photocell[4] < PHOTOCELL_LIGHT and prev_photocell[5] < PHOTOCELL_LIGHT ) :
-				new_avg = ( prev_photocell[3] + prev_photocell[4] + prev_photocell[5] ) / 3
-				old_avg = ( prev_photocell[0] + prev_photocell[1] + prev_photocell[2] ) / 3
+			if ( prev_photocell[2] < PHOTOCELL_LIGHT and prev_photocell[3] < PHOTOCELL_LIGHT ) :
+				new_avg = ( prev_photocell[2] + prev_photocell[3] ) / 2
+				old_avg = ( prev_photocell[0] + prev_photocell[1] ) / 2
 				if ( new_avg < ( old_avg - PHOTOCELL_DIFF ) ) :
 					#print 'Photocell: {0}'.format( prev_photocell )
 					return True
@@ -123,7 +123,7 @@ def is_ultrasonic_triggered() :
 def reset_prev_readings() :
 	global prev_photocell, prev_ultrasonic, prev_button
 	prev_button = True
-	prev_photocell = ( -1, -1, -1, -1, -1, -1 )
+	prev_photocell = ( -1, -1, -1, -1 )
 	prev_ultrasonic = ( -1, -1, -1, -1, -1, -1 )
 	time.sleep( 1 )
 
