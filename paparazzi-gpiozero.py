@@ -36,12 +36,15 @@ blue = LED( ULTRASONIC_LED_PIN )
 def take_picture_if_light( led, name ) :
 	global photocell
 
-	if ( photocell.light_detected ) :
+	if ( photocell.light_detected and not taking_picture() ) :
 		led.on()
 		print( name )
 		os.system( '/opt/bloginabox/biab camera-take-photo "' + datetime.now().strftime( '%-I:%M:%S %p' ) + ' - ' + name + '"' )
 		sleep( 1 )
 		led.off()
+
+def taking_picture() :
+	return green.is_lit or red.is_lit or blue.is_lit
 
 try :
 	ultrasonic.when_in_range = lambda: take_picture_if_light( blue, 'Ultrasonic' )
