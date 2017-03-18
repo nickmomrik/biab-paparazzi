@@ -18,7 +18,7 @@ ULTRASONIC_LED_PIN  = 13
 LIGHT_MIN        = 100
 PHOTOCELL_LIGHT  = 50
 PHOTOCELL_DIFF   = 100
-ULTRASONIC_DIST  = 100
+ULTRASONIC_DIST  = 110
 
 GPIO.setmode( GPIO.BCM )
 
@@ -43,6 +43,7 @@ def take_picture( led_pin, title ) :
 
 # https://learn.adafruit.com/basic-resistor-sensor-reading-on-raspberry-pi/basic-photocell-reading
 def read_photocell() :
+	# Reset and trigger the sensor
 	GPIO.setup( PHOTOCELL_PIN, GPIO.OUT )
 	GPIO.output( PHOTOCELL_PIN, GPIO.LOW )
 	time.sleep( 0.05 )
@@ -50,21 +51,24 @@ def read_photocell() :
 
 	start = time.clock()
 	while ( True ) :
-		end = time.clock()
+		diff = time.clock() - start
 		if ( GPIO.input( PHOTOCELL_PIN ) == GPIO.HIGH ) :
 			break
 
-		# Speed things up if it's sufficiently dark
-		if ( ( end - start ) > 0.2 ) :
+		# Don't keep looping if it's dark
+		if ( diff > 0.2 ) :
 			return 200
 
-	return int( round( ( end - start ) * 1000 ) )
+	return int( round( diff * 1000 ) )
 
 # https://www.modmypi.com/blog/hc-sr04-ultrasonic-range-sensor-on-the-raspberry-pi
 def read_ultrasonic() :
-	# Trigger the sensor
+	# Make sure the trigger pin is clean
+	GPIO.output( ULTRASONIC_TRIG_PIN, GPIO.LOW )
+	time.sleep( 0.005 )
+	# The trigger pin needs to be HIGH for at least 10 ms
 	GPIO.output( ULTRASONIC_TRIG_PIN, GPIO.HIGH )
-	time.sleep( 0.15 )
+	time.sleep( 0.02 )
 	GPIO.output( ULTRASONIC_TRIG_PIN, GPIO.LOW )
 
 	# Read the sensor
@@ -73,21 +77,17 @@ def read_ultrasonic() :
 		if ( GPIO.input( ULTRASONIC_ECHO_PIN ) == GPIO.HIGH ) :
 			break
 	while ( True ) :
-		end = time.clock()
+		diff = time.clock() - start
 		if ( GPIO.input( ULTRASONIC_ECHO_PIN ) == GPIO.LOW ) :
 			break
+		if ( diff > 0.2 ) :
+			return -1
 
-	diff = end - start
-	if ( diff > 0.2 ) :
-		value = -1
-	else :
-		value = int( round( diff * 17150 ) )
-
-	return value
+	return int( round( diff * 17150 ) )
 
 def is_light_enough() :
-	return ( prev_photocell[2] != -1 and prev_photocell[3] != -1
-		and prev_photocell[2] < LIGHT_MIN and prev_photocell[3] < LIGHT_MIN )
+	return ( prev_photocell[1] != -1 and prev_photocell[2] != -1
+		and prev_photocell[1] < LIGHT_MIN and prev_photocell[2] < LIGHT_MIN )
 
 def is_button_triggered() :
 	global prev_button
@@ -104,18 +104,17 @@ def is_button_triggered() :
 def is_photocell_triggered() :
 	global prev_photocell
 
-	# Take 4 readings
-	for i in range( 1, 4 ):
+	# Take 3 readings
+	for i in range( 3 ):
 		photocell = read_photocell()
 		# Shift readings
-		prev_photocell = ( prev_photocell[1], prev_photocell[2], prev_photocell[3], photocell )
-		new_avg = ( prev_photocell[2] + prev_photocell[3] ) / 2
-		old_avg = ( prev_photocell[0] + prev_photocell[1] ) / 2
+		prev_photocell = ( prev_photocell[1], prev_photocell[2], photocell )
+		new_avg = ( prev_photocell[1] + prev_photocell[2] ) / 2
 
 		if ( prev_photocell[0] != -1
-				and prev_photocell[2] < PHOTOCELL_LIGHT and prev_photocell[3] < PHOTOCELL_LIGHT
-				and new_avg < ( old_avg - PHOTOCELL_DIFF ) ) :
-			print 'Photocell: {0}'.format( prev_photocell )
+				and prev_photocell[1] < PHOTOCELL_LIGHT and prev_photocell[2] < PHOTOCELL_LIGHT
+				and new_avg < ( prev_photocell[0] - PHOTOCELL_DIFF ) ) :
+			#print 'Photocell: {0}'.format( prev_photocell )
 			return True
 
 	return False
@@ -123,8 +122,8 @@ def is_photocell_triggered() :
 def is_ultrasonic_triggered() :
 	global prev_ultrasonic
 
-	# Take 6 readings
-	for i in range( 1, 4 ):
+	# Take 4 readings
+	for i in range( 4 ):
 		ultrasonic = read_ultrasonic()
 		#Shift readings
 		prev_ultrasonic = ( prev_ultrasonic[1], prev_ultrasonic[2], prev_ultrasonic[3], ultrasonic )
@@ -133,7 +132,7 @@ def is_ultrasonic_triggered() :
 				and prev_ultrasonic[0] != -1
 				and prev_ultrasonic[2] < ULTRASONIC_DIST and prev_ultrasonic[3] < ULTRASONIC_DIST
 				and prev_ultrasonic[0] > ULTRASONIC_DIST and prev_ultrasonic[1] > ULTRASONIC_DIST ) :
-			print 'Ultrasonic: {0}'.format( prev_ultrasonic )
+			#print 'Ultrasonic: {0}'.format( prev_ultrasonic )
 			return True
 
 	return False
