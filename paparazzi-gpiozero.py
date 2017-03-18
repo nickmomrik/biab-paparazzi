@@ -15,24 +15,27 @@ ULTRASONIC_ECHO_PIN = 21
 ULTRASONIC_LED_PIN  = 13
 
 # TEST CONSTANTS
-ULTRASONIC_MAX_DIST = 1.8
+ULTRASONIC_MAX  = 1.8
 ULTRASONIC_DIST = 1
 PHOTOCELL_LIGHT = 0.2
 PHOTOCELL_QUEUE = 10
 
-ultrasonic = DistanceSensor(
-	echo = ULTRASONIC_ECHO_PIN,
-	trigger = ULTRASONIC_TRIG_PIN,
-	max_distance = ULTRASONIC_MAX_DIST,
-	threshold_distance = ULTRASONIC_DIST )
+# SENSORS
+button = Button( BUTTON_PIN )
 photocell = LightSensor(
 	pin = PHOTOCELL_PIN,
 	threshold = PHOTOCELL_LIGHT,
 	queue_len = PHOTOCELL_QUEUE )
-button = Button( BUTTON_PIN )
+ultrasonic = DistanceSensor(
+	echo = ULTRASONIC_ECHO_PIN,
+	trigger = ULTRASONIC_TRIG_PIN,
+	max_distance = ULTRASONIC_MAX,
+	threshold_distance = ULTRASONIC_DIST )
+
+# LED for each sensor
 green = LED( BUTTON_LED_PIN )
-red = LED( PHOTOCELL_LED_PIN )
-blue = LED( ULTRASONIC_LED_PIN )
+red   = LED( PHOTOCELL_LED_PIN )
+blue  = LED( ULTRASONIC_LED_PIN )
 
 def take_picture_if_light( led, name ) :
 	global photocell
