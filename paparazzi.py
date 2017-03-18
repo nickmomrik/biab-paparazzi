@@ -142,7 +142,7 @@ def reset_prev_readings() :
 
 	prev_button = GPIO.HIGH
 	prev_photocell = ( -1, -1, -1 )
-	prev_ultrasonic = ( -1, -1, -1, -1, -1 )
+	prev_ultrasonic = ( -1, -1, -1, -1, -1, -1 )
 	time.sleep( 1 )
 
 # Get the sensor variables and timer ready
