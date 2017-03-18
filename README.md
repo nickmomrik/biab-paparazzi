@@ -20,9 +20,9 @@ There are 2 versions:
  * `paparazzi-gpiozero.py` - uses [gpiozero](https://gpiozero.readthedocs.io/en/stable/) to handle all of the heavy lifting
 
 If you use the gpiozero version you'll need to install the library...
-`sudo apt-get update`
-`sudo apt-get install python3-gpiozero`
-OR (depending if you run Python 2 or 3)
-`sudo apt-get install python-gpiozero`
+```
+sudo apt-get update
+sudo apt-get install python3-gpiozero python-gpiozero
+```
 
 For both versions you'll want to update the GPIO PIN values at the top of the file to match your wiring. You may also need to adjust the TEST CONSTANT values. Then either run the program manually `python paparazzy[-gpiozero].py` or [run as a service](http://www.diegoacuna.me/how-to-run-a-script-as-a-service-in-raspberry-pi-raspbian-jessie/).
