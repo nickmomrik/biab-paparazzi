@@ -15,6 +15,7 @@ ULTRASONIC_ECHO_PIN = 21
 ULTRASONIC_LED_PIN  = 13
 
 # TEST CONSTANTS
+LIGHT_MIN        = 100
 PHOTOCELL_LIGHT  = 50
 PHOTOCELL_DIFF   = 100
 ULTRASONIC_DIST  = 100
@@ -35,7 +36,8 @@ GPIO.output( ULTRASONIC_LED_PIN, GPIO.LOW )
 
 def take_picture( led_pin, title ) :
 	GPIO.output( led_pin, GPIO.HIGH )
-	os.system( '/opt/bloginabox/biab camera-take-photo "' + datetime.now().strftime( '%-I:%M:%S %p' ) + ' - ' + title + '"' )
+	title = datetime.now().strftime( '%-I:%M:%S %p' ) + ' - ' + title
+	os.system( '/opt/bloginabox/biab camera-take-photo "' + title + '"' )
 	GPIO.output( led_pin, GPIO.LOW )
 	reset_prev_readings()
 
@@ -83,11 +85,18 @@ def read_ultrasonic() :
 
 	return value
 
+def is_light_enough() :
+	return ( prev_photocell[2] != -1 and prev_photocell[3] != -1
+		and prev_photocell[2] < LIGHT_MIN and prev_photocell[3] < LIGHT_MIN )
+
 def is_button_triggered() :
 	global prev_button
 	button = GPIO.input( BUTTON_PIN )
-	trigger = False == button and True == prev_button
-	prev_button = button
+	trigger = False
+	if ( is_light_enough()
+			and GPIO.LOW == button and GPIO.HIGH == prev_button ) :
+		trigger = True
+		prev_button = button
 
 	return trigger
 
@@ -99,14 +108,14 @@ def is_photocell_triggered() :
 		photocell = read_photocell()
 		# Shift readings
 		prev_photocell = ( prev_photocell[1], prev_photocell[2], prev_photocell[3], photocell )
+		new_avg = ( prev_photocell[2] + prev_photocell[3] ) / 2
+		old_avg = ( prev_photocell[0] + prev_photocell[1] ) / 2
 
-		if ( prev_photocell[0] != -1 ) :
-			if ( prev_photocell[2] < PHOTOCELL_LIGHT and prev_photocell[3] < PHOTOCELL_LIGHT ) :
-				new_avg = ( prev_photocell[2] + prev_photocell[3] ) / 2
-				old_avg = ( prev_photocell[0] + prev_photocell[1] ) / 2
-				if ( new_avg < ( old_avg - PHOTOCELL_DIFF ) ) :
-					#print 'Photocell: {0}'.format( prev_photocell )
-					return True
+		if ( prev_photocell[0] != -1
+				and prev_photocell[2] < PHOTOCELL_LIGHT and prev_photocell[3] < PHOTOCELL_LIGHT
+				and new_avg < ( old_avg - PHOTOCELL_DIFF ) ) :
+			print 'Photocell: {0}'.format( prev_photocell )
+			return True
 
 	return False
 
@@ -119,21 +128,24 @@ def is_ultrasonic_triggered() :
 		#Shift readings
 		prev_ultrasonic = ( prev_ultrasonic[1], prev_ultrasonic[2], prev_ultrasonic[3], ultrasonic )
 
-		if ( prev_ultrasonic[0] != -1 ) :
-			if ( prev_ultrasonic[2] < ULTRASONIC_DIST and prev_ultrasonic[3] < ULTRASONIC_DIST ) :
-				if ( prev_ultrasonic[0] > ULTRASONIC_DIST and prev_ultrasonic[1] > ULTRASONIC_DIST ) :
-					#print 'Ultrasonic: {0}'.format( prev_ultrasonic )
-					return True
+		if ( is_light_enough()
+				and prev_ultrasonic[0] != -1
+				and prev_ultrasonic[2] < ULTRASONIC_DIST and prev_ultrasonic[3] < ULTRASONIC_DIST
+				and prev_ultrasonic[0] > ULTRASONIC_DIST and prev_ultrasonic[1] > ULTRASONIC_DIST ) :
+			print 'Ultrasonic: {0}'.format( prev_ultrasonic )
+			return True
 
 	return False
 
 def reset_prev_readings() :
 	global prev_photocell, prev_ultrasonic, prev_button
-	prev_button = True
+
+	prev_button = GPIO.HIGH
 	prev_photocell = ( -1, -1, -1, -1 )
 	prev_ultrasonic = ( -1, -1, -1, -1 )
 	time.sleep( 1 )
 
+# Get the sensor variables and timer ready
 reset_prev_readings()
 time.clock()
 
