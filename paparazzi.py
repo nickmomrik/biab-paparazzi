@@ -17,7 +17,7 @@ ULTRASONIC_LED_PIN  = 13
 # TEST CONSTANTS
 PHOTOCELL_LIGHT  = 50
 PHOTOCELL_DIFF   = 100
-ULTRASONIC_DIST  = 110
+ULTRASONIC_DIST  = 100
 
 GPIO.setmode( GPIO.BCM )
 
@@ -43,14 +43,18 @@ def take_picture( led_pin, title ) :
 def read_photocell() :
 	GPIO.setup( PHOTOCELL_PIN, GPIO.OUT )
 	GPIO.output( PHOTOCELL_PIN, GPIO.LOW )
-	time.sleep( 0.1 )
-
-	start = time.time()
+	time.sleep( 0.05 )
 	GPIO.setup( PHOTOCELL_PIN, GPIO.IN )
 
-	end = start
-	while ( GPIO.input( PHOTOCELL_PIN ) == GPIO.LOW ) :
-		end = time.time()
+	start = time.clock()
+	while ( True ) :
+		end = time.clock()
+		if ( GPIO.input( PHOTOCELL_PIN ) == GPIO.HIGH ) :
+			break
+
+		# Speed things up if it's sufficiently dark
+		if ( ( end - start ) > 0.2 ) :
+			return 200
 
 	return int( round( ( end - start ) * 1000 ) )
 
@@ -58,22 +62,26 @@ def read_photocell() :
 def read_ultrasonic() :
 	# Trigger the sensor
 	GPIO.output( ULTRASONIC_TRIG_PIN, GPIO.HIGH )
-	time.sleep( 0.00001 )
+	time.sleep( 0.15 )
 	GPIO.output( ULTRASONIC_TRIG_PIN, GPIO.LOW )
 
 	# Read the sensor
 	while ( True ) :
-		pulse_start = time.time()
+		start = time.clock()
 		if ( GPIO.input( ULTRASONIC_ECHO_PIN ) == GPIO.HIGH ) :
 			break
 	while ( True ) :
-		pulse_end = time.time()
+		end = time.clock()
 		if ( GPIO.input( ULTRASONIC_ECHO_PIN ) == GPIO.LOW ) :
 			break
 
-	time.sleep( 0.0001 )
+	diff = end - start
+	if ( diff > 0.2 ) :
+		value = -1
+	else :
+		value = int( round( diff * 17150 ) )
 
-	return int( round( ( pulse_end - pulse_start ) * 17150 ) )
+	return value
 
 def is_button_triggered() :
 	global prev_button
@@ -106,14 +114,14 @@ def is_ultrasonic_triggered() :
 	global prev_ultrasonic
 
 	# Take 6 readings
-	for i in range( 1, 6 ):
+	for i in range( 1, 4 ):
 		ultrasonic = read_ultrasonic()
 		#Shift readings
-		prev_ultrasonic = ( prev_ultrasonic[1], prev_ultrasonic[2], prev_ultrasonic[3], prev_ultrasonic[4], prev_ultrasonic[5], ultrasonic )
+		prev_ultrasonic = ( prev_ultrasonic[1], prev_ultrasonic[2], prev_ultrasonic[3], ultrasonic )
 
 		if ( prev_ultrasonic[0] != -1 ) :
-			if ( prev_ultrasonic[3] < ULTRASONIC_DIST and prev_ultrasonic[4] < ULTRASONIC_DIST and prev_ultrasonic[5] < ULTRASONIC_DIST ) :
-				if ( prev_ultrasonic[0] > ULTRASONIC_DIST and prev_ultrasonic[1] > ULTRASONIC_DIST and prev_ultrasonic[2] > ULTRASONIC_DIST ) :
+			if ( prev_ultrasonic[2] < ULTRASONIC_DIST and prev_ultrasonic[3] < ULTRASONIC_DIST ) :
+				if ( prev_ultrasonic[0] > ULTRASONIC_DIST and prev_ultrasonic[1] > ULTRASONIC_DIST ) :
 					#print 'Ultrasonic: {0}'.format( prev_ultrasonic )
 					return True
 
@@ -123,15 +131,21 @@ def reset_prev_readings() :
 	global prev_photocell, prev_ultrasonic, prev_button
 	prev_button = True
 	prev_photocell = ( -1, -1, -1, -1 )
-	prev_ultrasonic = ( -1, -1, -1, -1, -1, -1 )
+	prev_ultrasonic = ( -1, -1, -1, -1 )
 	time.sleep( 1 )
 
 reset_prev_readings()
+time.clock()
 
-while True:
-	if ( is_button_triggered() ) :
-		take_picture( BUTTON_LED_PIN, 'Button' )
-	elif ( is_photocell_triggered() ) :
-		take_picture( PHOTOCELL_LED_PIN, 'Photocell' )
-	elif ( is_ultrasonic_triggered() ) :
-		take_picture( ULTRASONIC_LED_PIN, 'Ultrasonic' )
+try :
+	while ( True ) :
+		if ( is_button_triggered() ) :
+			take_picture( BUTTON_LED_PIN, 'Button' )
+		elif ( is_photocell_triggered() ) :
+			take_picture( PHOTOCELL_LED_PIN, 'Photocell' )
+		elif ( is_ultrasonic_triggered() ) :
+			take_picture( ULTRASONIC_LED_PIN, 'Ultrasonic' )
+except KeyboardInterrupt :
+	print 'Exiting via CTRL+C...'
+finally :
+	GPIO.cleanup()
