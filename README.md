@@ -17,9 +17,9 @@ Check out the [Fritzing](./paparazzi.fzz) or reference the screenshot below.
 ## Instructions
 There are 2 versions:
  * `paparazzi.py` - A lot of code to control the sensors and hack all you want
- * `paparazzi-gpiozero.py` - uses [Gpiozero](https://gpiozero.readthedocs.io/en/stable/) to handle all of the heavy lifting
+ * `paparazzi-gpiozero.py` - uses [gpiozero](https://gpiozero.readthedocs.io/en/stable/) to handle all of the heavy lifting
 
-If you use the Gpiozero version you'll need to install the library...
+If you use the gpiozero version you'll need to install the library...
 `sudo apt-get update`
 `sudo apt-get install python3-gpiozero`
 OR (depending if you run Python 2 or 3)
