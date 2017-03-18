@@ -3,6 +3,7 @@
 from gpiozero import DistanceSensor, LightSensor, Button, LED
 from datetime import datetime
 from signal import pause
+from time import sleep
 import os
 
 # GPIO PINS
@@ -17,15 +18,17 @@ ULTRASONIC_LED_PIN  = 13
 # TEST CONSTANTS
 ULTRASONIC_MAX  = 1.8
 ULTRASONIC_DIST = 1
-PHOTOCELL_LIGHT = 0.2
-PHOTOCELL_QUEUE = 10
+PHOTOCELL_LIGHT = 0.1
+PHOTOCELL_QUEUE = 5
+PHOTOCELL_LIMIT = 0.02
 
 # SENSORS
 button = Button( BUTTON_PIN )
 photocell = LightSensor(
 	pin = PHOTOCELL_PIN,
 	threshold = PHOTOCELL_LIGHT,
-	queue_len = PHOTOCELL_QUEUE )
+	queue_len = PHOTOCELL_QUEUE,
+	charge_time_limit = PHOTOCELL_LIMIT )
 ultrasonic = DistanceSensor(
 	echo = ULTRASONIC_ECHO_PIN,
 	trigger = ULTRASONIC_TRIG_PIN,
