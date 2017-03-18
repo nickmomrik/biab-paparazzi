@@ -37,10 +37,10 @@ green = LED( BUTTON_LED_PIN )
 red   = LED( PHOTOCELL_LED_PIN )
 blue  = LED( ULTRASONIC_LED_PIN )
 
-def take_picture_if_light( led, name ) :
+def take_picture_if_light( led, name, light = False ) :
 	global photocell
 
-	if ( photocell.light_detected and not taking_picture() ) :
+	if ( ( light or photocell.light_detected ) and not taking_picture() ) :
 		led.on()
 		print( name )
 		os.system( '/opt/bloginabox/biab camera-take-photo "' + datetime.now().strftime( '%-I:%M:%S %p' ) + ' - ' + name + '"' )
@@ -51,7 +51,7 @@ def taking_picture() :
 
 try :
 	ultrasonic.when_in_range = lambda: take_picture_if_light( blue, 'Ultrasonic' )
-	photocell.when_light = lambda: take_picture_if_light( red, 'Photocell' )
+	photocell.when_light = lambda: take_picture_if_light( red, 'Photocell', True )
 	button.when_pressed = lambda: take_picture_if_light( green, 'Button' )
 
 	pause()
