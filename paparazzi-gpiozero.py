@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 from gpiozero import DistanceSensor, LightSensor, Button, LED
-from time import sleep
 from datetime import datetime
 from signal import pause
 import os
@@ -19,6 +18,7 @@ ULTRASONIC_LED_PIN  = 13
 ULTRASONIC_MAX_DIST = 1.8
 ULTRASONIC_DIST = 1
 PHOTOCELL_LIGHT = 0.2
+PHOTOCELL_QUEUE = 10
 
 ultrasonic = DistanceSensor(
 	echo = ULTRASONIC_ECHO_PIN,
@@ -27,7 +27,8 @@ ultrasonic = DistanceSensor(
 	threshold_distance = ULTRASONIC_DIST )
 photocell = LightSensor(
 	pin = PHOTOCELL_PIN,
-	threshold = PHOTOCELL_LIGHT )
+	threshold = PHOTOCELL_LIGHT,
+	queue_len = PHOTOCELL_QUEUE )
 button = Button( BUTTON_PIN )
 green = LED( BUTTON_LED_PIN )
 red = LED( PHOTOCELL_LED_PIN )
@@ -40,7 +41,6 @@ def take_picture_if_light( led, name ) :
 		led.on()
 		print( name )
 		os.system( '/opt/bloginabox/biab camera-take-photo "' + datetime.now().strftime( '%-I:%M:%S %p' ) + ' - ' + name + '"' )
-		sleep( 1 )
 		led.off()
 
 def taking_picture() :
