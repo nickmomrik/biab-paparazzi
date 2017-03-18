@@ -91,14 +91,15 @@ def is_light_enough() :
 
 def is_button_triggered() :
 	global prev_button
+
 	button = GPIO.input( BUTTON_PIN )
-	trigger = False
+
 	if ( is_light_enough()
 			and GPIO.LOW == button and GPIO.HIGH == prev_button ) :
-		trigger = True
 		prev_button = button
+		return True
 
-	return trigger
+	return False
 
 def is_photocell_triggered() :
 	global prev_photocell
