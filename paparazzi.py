@@ -122,16 +122,16 @@ def is_photocell_triggered() :
 def is_ultrasonic_triggered() :
 	global prev_ultrasonic
 
-	# Take 4 readings
-	for i in range( 4 ):
+	# Take 6 readings
+	for i in range( 6 ):
 		ultrasonic = read_ultrasonic()
 		#Shift readings
-		prev_ultrasonic = ( prev_ultrasonic[1], prev_ultrasonic[2], prev_ultrasonic[3], ultrasonic )
+		prev_ultrasonic = ( prev_ultrasonic[1], prev_ultrasonic[2], prev_ultrasonic[3], prev_ultrasonic[4], prev_ultrasonic[5], ultrasonic )
 
 		if ( is_light_enough()
 				and prev_ultrasonic[0] != -1
-				and prev_ultrasonic[2] < ULTRASONIC_DIST and prev_ultrasonic[3] < ULTRASONIC_DIST
-				and prev_ultrasonic[0] > ULTRASONIC_DIST and prev_ultrasonic[1] > ULTRASONIC_DIST ) :
+				and prev_ultrasonic[3] < ULTRASONIC_DIST and prev_ultrasonic[4] < ULTRASONIC_DIST and prev_ultrasonic[5] < ULTRASONIC_DIST
+				and prev_ultrasonic[0] > ULTRASONIC_DIST and prev_ultrasonic[1] > ULTRASONIC_DIST and prev_ultrasonic[2] > ULTRASONIC_DIST ) :
 			#print 'Ultrasonic: {0}'.format( prev_ultrasonic )
 			return True
 
@@ -141,8 +141,8 @@ def reset_prev_readings() :
 	global prev_photocell, prev_ultrasonic, prev_button
 
 	prev_button = GPIO.HIGH
-	prev_photocell = ( -1, -1, -1, -1 )
-	prev_ultrasonic = ( -1, -1, -1, -1 )
+	prev_photocell = ( -1, -1, -1 )
+	prev_ultrasonic = ( -1, -1, -1, -1, -1 )
 	time.sleep( 1 )
 
 # Get the sensor variables and timer ready
