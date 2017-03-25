@@ -16,8 +16,8 @@ ULTRASONIC_ECHO_PIN = 21
 ULTRASONIC_LED_PIN  = 13
 
 # TEST CONSTANTS
-ULTRASONIC_MAX  = 1.8
-ULTRASONIC_DIST = 1
+ULTRASONIC_MAX  = 1.5625
+ULTRASONIC_DIST = 1.1
 PHOTOCELL_LIGHT = 0.1
 PHOTOCELL_QUEUE = 5
 PHOTOCELL_LIMIT = 0.02
@@ -45,7 +45,6 @@ def take_picture_if_light( led, name, light = False ) :
 
 	if ( ( light or photocell.light_detected ) and not taking_picture() ) :
 		led.on()
-		print( name )
 		os.system( '/opt/bloginabox/biab camera-take-photo "' + datetime.now().strftime( '%-I:%M:%S %p' ) + ' - ' + name + '"' )
 		led.off()
 
@@ -58,6 +57,5 @@ try :
 	button.when_pressed = lambda: take_picture_if_light( green, 'Button' )
 
 	pause()
-
 except KeyboardInterrupt :
-	print 'Exiting via CTRL+C...'
+	print( ' Exiting via CTRL+C...' )
