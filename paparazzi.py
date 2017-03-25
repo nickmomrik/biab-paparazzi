@@ -65,7 +65,7 @@ def read_photocell() :
 def read_ultrasonic() :
 	# Make sure the trigger pin is clean
 	GPIO.output( ULTRASONIC_TRIG_PIN, GPIO.LOW )
-	# Recommonded resample time is 50ms
+	# Recommended resample time is 50ms
 	time.sleep( 0.05 )
 	# The trigger pin needs to be HIGH for at least 10ms
 	GPIO.output( ULTRASONIC_TRIG_PIN, GPIO.HIGH )
