@@ -50,14 +50,9 @@ def read_photocell() :
 	GPIO.setup( PHOTOCELL_PIN, GPIO.IN )
 
 	start = time.clock()
-	while ( True ) :
-		diff = time.clock() - start
-		if ( GPIO.input( PHOTOCELL_PIN ) == GPIO.HIGH ) :
-			break
-
-		# Don't keep looping if it's dark
-		if ( diff > 0.2 ) :
-			return 200
+	while ( GPIO.input( PHOTOCELL_PIN ) == GPIO.LOW ) :
+		pass
+	diff = time.clock() - start
 
 	return int( round( diff * 1000 ) )
 
@@ -73,18 +68,14 @@ def read_ultrasonic() :
 	GPIO.output( ULTRASONIC_TRIG_PIN, GPIO.LOW )
 
 	# Read the sensor
-	while ( True ) :
-		start = time.clock()
-		if ( GPIO.input( ULTRASONIC_ECHO_PIN ) == GPIO.HIGH ) :
-			break
-	while ( True ) :
-		diff = time.clock() - start
-		if ( GPIO.input( ULTRASONIC_ECHO_PIN ) == GPIO.LOW ) :
-			break
-		if ( diff > 0.02 ) :
-			return -1
+	while ( GPIO.input( ULTRASONIC_ECHO_PIN ) == GPIO.LOW ) :
+		pass
+	start = time.clock()
 
-	return int( round( diff * 17150 ) )
+	while ( GPIO.input( ULTRASONIC_ECHO_PIN ) == GPIO.HIGH ) :
+		pass
+
+	return int( round( ( time.clock() - start ) * 17150 ) )
 
 def is_light_enough() :
 	return ( prev_photocell[1] != -1 and prev_photocell[2] != -1
@@ -144,7 +135,6 @@ def reset_prev_readings() :
 	prev_button = GPIO.HIGH
 	prev_photocell = ( -1, -1, -1 )
 	prev_ultrasonic = ( -1, -1, -1, -1, -1, -1 )
-	time.sleep( 1 )
 
 # Get the sensor variables and timer ready
 reset_prev_readings()
